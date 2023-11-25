@@ -15,19 +15,20 @@ class Report:
 
 class BuildMetricReport:
     def __call__(self, calculated_metric, metric_items) -> Report:
+
+        mappings_estimator = {
+            "t_test": TTestFromStats(),
+            "mann_whitney": UTestFromTest(),
+            "prop_test": ProportionZFromTest()
+        }
+        
+        test = mappings_estimator[metric_items.estimator]
         df_ = calculate_linearization(calculated_metric)
-        stats = calculate_statistics(df_, metric_items.type)
-
-        if metric_items.estimator == 't_test':
-            test = TTestFromStats()
-            criteria_res = test(stats)
-        elif metric_items.estimator  == 'prop_test':
-            test = ProportionZFromTest()
-            criteria_res = test(stats)
-        elif metric_items.estimator  == 'mann_whitney':
-            test = UTestFromTest()
+        if metric_items.estimator == 'mann_whitney':
             criteria_res = test(df_)
-
+        else: 
+            stats = calculate_statistics(df_, metric_items.type)
+            criteria_res = test(stats)
 
         cfg.logger.info(f"{metric_items.name}")
 

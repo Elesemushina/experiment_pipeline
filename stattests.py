@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import abc
 import statsmodels.stats.proportion as smprop
-from scipy.stats import ttest_ind_from_stats, ttest_ind, wilcoxon
+from scipy.stats import ttest_ind_from_stats, ttest_ind, mannwhitneyu
 
 import config as cfg
 
@@ -112,7 +112,7 @@ class UTestFromTest(Estimator):
         sample_0 = df['num'][df[cfg.VARIANT_COL] == _unique_variants[0]]
         sample_1 = df['num'][df[cfg.VARIANT_COL] == _unique_variants[1]]
         try:
-            statistic, pvalue = wilcoxon(
+            statistic, pvalue = mannwhitneyu(
                 sample_0,
                 sample_1
                 )
