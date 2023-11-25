@@ -14,7 +14,7 @@ formatter = logging.Formatter('[%(asctime)s] - %(name)s - %(levelname)s - %(mess
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-PATH_METRIC_CONFIGS = "params/metrics/"
+PATH_METRIC_CONFIGS = "params/metrics"
 DEFAULT_ESTIMATOR = "t_test_linearization"
 DEFAULT_METRIC_TYPE = "ratio"
 DEFAULT_UNIT_LEVEL = "client_id"

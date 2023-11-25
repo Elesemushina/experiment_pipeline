@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
 import abc
-
-from scipy.stats import ttest_ind_from_stats, ttest_ind
+import statsmodels.stats.proportion as smprop
+from scipy.stats import ttest_ind_from_stats, ttest_ind, wilcoxon
 
 import config as cfg
 
@@ -14,13 +14,23 @@ class EstimatorCriteriaValues:
 
 
 class Statistics:
-    def __init__(self, mean_0: float, mean_1: float, var_0: float, var_1: float, n_0: int, n_1: int):
+    def __init__(self, 
+                 mean_0: float, 
+                 mean_1: float,
+                 var_0: float, 
+                 var_1: float, 
+                 n_0: int, 
+                 n_1: int,
+                 cnt_success_0: int,
+                 cnt_success_1: int):
         self.mean_0 = mean_0
         self.mean_1 = mean_1
         self.var_0 = var_0
         self.var_1 = var_1
         self.n_0 = n_0
         self.n_1 = n_1
+        self.cnt_success_0 = cnt_success_0
+        self.cnt_success_1 = cnt_success_1
 
 
 class MetricStats(abc.ABC):
@@ -44,8 +54,11 @@ class BaseStatsRatio(MetricStats):
         mean_1 = sum(df['num'][df[cfg.VARIANT_COL] == _unique_variants[1]]) / sum(df['den'][df[cfg.VARIANT_COL] == _unique_variants[1]])
         var_0 = df['l_ratio'][df[cfg.VARIANT_COL] == _unique_variants[0]].var()
         var_1 = df['l_ratio'][df[cfg.VARIANT_COL] == _unique_variants[1]].var()
+        cnt_success_0 = sum(df['num'][df[cfg.VARIANT_COL] == _unique_variants[0]])
+        cnt_success_1 = sum(df['num'][df[cfg.VARIANT_COL] == _unique_variants[1]])
 
-        return Statistics(mean_0, mean_1, var_0, var_1, n_0, n_1)
+
+        return Statistics(mean_0, mean_1, var_0, var_1, n_0, n_1, cnt_success_0, cnt_success_1)
 
 
 class Linearization():
@@ -74,6 +87,40 @@ class TTestFromStats(Estimator):
             statistic, pvalue = None, None
 
         return EstimatorCriteriaValues(pvalue, statistic)
+    
+
+
+class ProportionZFromTest(Estimator):
+
+    def __call__(self, stat: Statistics) -> EstimatorCriteriaValues:
+        try:
+            statistic, pvalue = smprop.proportions_ztest(
+                [stat.cnt_success_0, stat.cnt_success_1],
+                [stat.n_0, stat.n_1]
+                )
+        except Exception as e:
+            cfg.logger.error(e)
+            statistic, pvalue = None, None
+
+        return EstimatorCriteriaValues(pvalue, statistic)    
+    
+class UTestFromTest(Estimator):
+
+    def __call__(self, df) -> EstimatorCriteriaValues:
+                
+        _unique_variants = df[cfg.VARIANT_COL].unique()
+        sample_0 = df['num'][df[cfg.VARIANT_COL] == _unique_variants[0]]
+        sample_1 = df['num'][df[cfg.VARIANT_COL] == _unique_variants[1]]
+        try:
+            statistic, pvalue = wilcoxon(
+                sample_0,
+                sample_1
+                )
+        except Exception as e:
+            cfg.logger.error(e)
+            statistic, pvalue = None, None
+
+        return EstimatorCriteriaValues(statistic, pvalue)        
 
 
 def calculate_statistics(df, type):

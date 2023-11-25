@@ -8,7 +8,7 @@ from os import listdir
 
 
 def _load_yaml_preset(preset="default"):
-    preset_path = config.PATH_METRIC_CONFIGS + preset
+    preset_path = config.PATH_METRIC_CONFIGS + "/" + preset
     metrics_to_load = listdir(preset_path)
     metrics = []
     for metric in metrics_to_load:
