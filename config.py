@@ -15,11 +15,11 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 PATH_METRIC_CONFIGS = "params/metrics"
+MONTE_CARLO_CONFIGS = "params/montecarlo"
 DEFAULT_ESTIMATOR = "t_test_linearization"
 DEFAULT_METRIC_TYPE = "ratio"
 DEFAULT_UNIT_LEVEL = "client_id"
 DEFAULT_VALUE = "Unknown"
 VARIANT_COL = "experiment_variant"
 USER_ID_COL = "client_id"
-
 

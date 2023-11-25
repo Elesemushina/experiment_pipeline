@@ -47,7 +47,8 @@ class BuildMetricReport:
         return Report(report_items)
 
 
-def build_experiment_report(df, metric_config):
+def build_experiment_report(df, 
+                            metric_config):
     build_metric_report = BuildMetricReport()
     reports = []
 

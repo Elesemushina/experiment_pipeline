@@ -7,8 +7,9 @@ from yaml.loader import SafeLoader
 from os import listdir
 
 
-def _load_yaml_preset(preset="default"):
-    preset_path = config.PATH_METRIC_CONFIGS + "/" + preset
+def _load_yaml_preset(path = config.PATH_METRIC_CONFIGS, 
+                      preset="default"):
+    preset_path = path + "/" + preset
     metrics_to_load = listdir(preset_path)
     metrics = []
     for metric in metrics_to_load:
@@ -18,7 +19,8 @@ def _load_yaml_preset(preset="default"):
 
 
 class Metric:
-    def __init__(self, metric_config: dict):
+    def __init__(self, 
+                 metric_config: dict):
         self._config = metric_config
 
     @property
@@ -76,7 +78,12 @@ class CalculateMetric:
     def __init__(self, metric: Metric):
         self.metric = metric
 
-    def __call__(self, df):
+    def __call__(self, df, lift=None):
+        if lift:
+            df[config.VARIANT_COL] = np.random.choice(2, len(df))
+            if lift > 0:
+                df[self.metric.numerator_aggregation_field] = df[self.metric.numerator_aggregation_field] * lift
+
         return df.groupby([config.VARIANT_COL, self.metric.level]).apply(
             lambda df: pd.Series({
                 "num": self.metric.numerator_aggregation_function(df[self.metric.numerator_aggregation_field]),
