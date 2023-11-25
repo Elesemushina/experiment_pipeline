@@ -24,10 +24,10 @@ class BuildMetricReport:
         
         test = mappings_estimator[metric_items.estimator]
         df_ = calculate_linearization(calculated_metric)
+        stats = calculate_statistics(df_, metric_items.type)
         if metric_items.estimator == 'mann_whitney':
             criteria_res = test(df_)
         else: 
-            stats = calculate_statistics(df_, metric_items.type)
             criteria_res = test(stats)
 
         cfg.logger.info(f"{metric_items.name}")
