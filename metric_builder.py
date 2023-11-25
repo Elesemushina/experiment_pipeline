@@ -20,8 +20,10 @@ def _load_yaml_preset(path = config.PATH_METRIC_CONFIGS,
 
 class Metric:
     def __init__(self, 
-                 metric_config: dict):
+                 metric_config: dict,
+                 contecarlo_config: dict = None):
         self._config = metric_config
+        self._mc_config = contecarlo_config
 
     @property
     def name(self) -> str:
@@ -62,6 +64,14 @@ class Metric:
     @property
     def denominator_aggregation_function(self) -> callable:
         return self._map_aggregation_function(self.denominator.get("aggregation_function"))
+    
+    @property
+    def lift_list(self) -> list:
+         return self._mc_config[0]['lifts']
+    
+    @property
+    def mc_estimators_list(self) -> list:
+         return self._mc_config[0]['estimators']
 
     @staticmethod
     def _map_aggregation_function(aggregation_function: str) -> callable:
@@ -72,6 +82,7 @@ class Metric:
         if aggregation_function not in mappings:
             raise ValueError(f"{aggregation_function} not found in mappings")
         return mappings[aggregation_function]
+        
 
 
 class CalculateMetric:
